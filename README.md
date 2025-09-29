@@ -19,7 +19,7 @@ A comprehensive AI-powered medical document analyzer that extracts, summarizes, 
 
 ## Quick Start Options
 
-### Method 1: GitHub Codespaces (No Installation Required)
+### Method 1: For GitHub Codespaces
 1. Click the "Code" button above
 2. Select "Codespaces" → "Create codespace on main"
 3. Wait for environment setup (3-5 minutes)
@@ -155,14 +155,13 @@ python -m uvicorn medical_ai_backend:app --reload --host 0.0.0.0
 
 **Memory issues during analysis**
 - Close other applications to free RAM
-- Consider using lighter models for low-memory systems
 - Process smaller PDF files if memory constraints exist
 
 ## Performance Notes
 
 - **First Run**: 5-15 minutes (model downloads + loading)
 - **Subsequent Runs**: 1-2 minutes startup time
-- **Analysis Speed**: 30-90 seconds per document
+- **Analysis Speed**: 10-30 seconds per document depends on the page
 - **Translation**: Additional 30-60 seconds for non-English languages
 
 ## Contributing
@@ -176,10 +175,6 @@ python -m uvicorn medical_ai_backend:app --reload --host 0.0.0.0
 ## License
 
 MIT License - See LICENSE file for details
-
-## Medical Disclaimer
-
-This tool is designed for informational and educational purposes only. It does not provide medical advice, diagnosis, or treatment. Always consult qualified healthcare professionals for medical decisions and interpretations of medical reports.
 
 ## Acknowledgments
 

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NavDoc AI - Medical Document Analyzer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input[type="file"], select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        .error {
+            background-color: #fadbd8;
+            border-left-color: #e74c3c;
+            color: #c0392b;
+        }
+        .success {
+            background-color: #d5f4e6;
+            border-left-color: #27ae60;
+        }
+        .health-status {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+        }
+        .summary-text {
+            font-family: 'Georgia', serif;
+            line-height: 1.8;
+            font-size: 16px;
+            color: #2c3e50;
+            white-space: pre-line;
+        }
+        .recommendation-text {
+            font-family: 'Georgia', serif;
+            line-height: 2.0;
+            font-size: 16px;
+            color: #2c3e50;
+            white-space: pre-line;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #28a745;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .doc-type {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>NavDoc AI - Medical Document Analyzer</h2>
+        
+        <div id="healthStatus" class="health-status">
+            Checking system status...
+        </div>
+
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="fileInput">Select PDF File:</label>
+                <input type="file" id="fileInput" name="file" accept=".pdf" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="languageSelect">Summary Language:</label>
+                <select id="languageSelect" name="language" required>
+                    <option value="english">English</option>
+                    <option value="hindi">हिंदी (Hindi)</option>
+                    <option value="marathi">मराठी (Marathi)</option>
+                    <option value="nepali">नेपाली (Nepali)</option>
+                    <option value="spanish">Español (Spanish)</option>
+                    <option value="french">Français (French)</option>
+                    <option value="german">Deutsch (German)</option>
+                    <option value="portuguese">Português (Portuguese)</option>
+                    <option value="arabic">العربية (Arabic)</option>
+                    <option value="chinese">中文 (Chinese)</option>
+                    <option value="japanese">日本語 (Japanese)</option>
+                    <option value="korean">한국어 (Korean)</option>
+                </select>
+            </div>
+            
+            <button type="submit" id="submitBtn">Analyze PDF Document</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing document... This may take a few minutes.</p>
+        </div>
+
+        <div id="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const result = document.getElementById('result');
+        const loading = document.getElementById('loading');
+        const submitBtn = document.getElementById('submitBtn');
+        const healthStatus = document.getElementById('healthStatus');
+
+        // Check health status on load
+        async function checkHealth() {
+            try {
+                const response = await fetch("http://127.0.0.1:8000/health");
+                const data = await response.json();
+                
+                let statusHtml = `<strong>System Status:</strong> `;
+                if (data.status === 'healthy') {
+                    statusHtml += `Backend Online | `;
+                    statusHtml += `Summarizer: ${data.summarizer_available ? 'Available' : 'Unavailable'} | `;
+                    statusHtml += `OCR: ${data.tesseract_available ? 'Available' : 'Unavailable'}`;
+                    if (data.features) {
+                        statusHtml += ` | Features: ${data.features.join(', ')}`;
+                    }
+                } else {
+                    statusHtml += `Backend Offline`;
+                }
+                
+                healthStatus.innerHTML = statusHtml;
+            } catch (error) {
+                healthStatus.innerHTML = `<strong>Warning:</strong> Cannot connect to backend server. Make sure it's running on http://127.0.0.1:8000`;
+                healthStatus.className = 'health-status error';
+            }
+        }
+
+        // Check health on page load
+        checkHealth();
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('fileInput');
+            const languageSelect = document.getElementById('languageSelect');
+
+            if (!fileInput.files[0]) {
+                showResult('Please select a PDF file.', 'error');
+                return;
+            }
+
+            // Show loading
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+
+            try {
+                const formData = new FormData();
+                formData.append("file", fileInput.files[0]);
+                formData.append("language", languageSelect.value);
+
+                console.log('Sending file:', fileInput.files[0].name, 'Language:', languageSelect.value);
+
+                const response = await fetch("http://127.0.0.1:8000/analyze", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+                console.log('Response:', data);
+
+                if (response.ok && data.success) {
+                    // Clean bullet points and format text properly
+                    let cleanSummary = data.summary
+                        .replace(/•/g, '')  // Remove bullet points
+                        .replace(/→/g, '')  // Remove arrows
+                        .replace(/^\s*[\-\*]\s*/gm, '')  // Remove dash/asterisk bullets at line start
+                        .replace(/\n\s*\n/g, '\n')  // Remove extra blank lines
+                        .trim();
+                    
+                    let cleanRecommendation = data.recommendation
+                        .replace(/•/g, '')  // Remove bullet points
+                        .replace(/→/g, '')  // Remove arrows
+                        .replace(/^\s*[\-\*]\s*/gm, '')  // Remove dash/asterisk bullets at line start
+                        .trim();
+                    
+                    showResult(`
+                        <h3>Document Analysis Complete</h3>
+                        ${data.document_type ? `<div class="doc-type">${data.document_type} document</div>` : ''}
+                        
+                        <h4>Summary:</h4>
+                        <div class="summary-text">${cleanSummary}</div>
+                        
+                        <h4>Recommendations:</h4>
+                        <div class="recommendation-text">${cleanRecommendation}</div>
+                    `, 'success');
+                } else {
+                    showResult(`
+                        <h3>Analysis Failed</h3>
+                        <p><strong>Error:</strong> ${data.detail || data.error || 'Unknown error occurred'}</p>
+                        <p>Please check that:</p>
+                        <ul>
+                            <li>The PDF file is not corrupted</li>
+                            <li>The PDF contains readable text (not just images)</li>
+                            <li>The backend server is running</li>
+                            <li>All required models are installed</li>
+                        </ul>
+                    `, 'error');
+                }
+            } catch (error) {
+                console.error('Request failed:', error);
+                showResult(`
+                    <h3>Connection Error</h3>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p>Please check that the backend server is running at http://127.0.0.1:8000</p>
+                    <p>Run: <code>uvicorn medical_ai_backend:app --reload</code></p>
+                `, 'error');
+            } finally {
+                // Hide loading
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Analyze PDF Document';
+            }
+        });
+
+        function showResult(content, type = 'success') {
+            result.innerHTML = content;
+            result.className = `result ${type}`;
+            result.style.display = 'block';
+        }
+
+        // File input validation
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && !file.name.toLowerCase().endsWith('.pdf')) {
+                alert('Please select a PDF file only.');
+                this.value = '';
+            } else if (file && file.size > 50 * 1024 * 1024) { // 50MB limit
+                alert('File size should be less than 50MB.');
+                this.value = '';
+            }
+        });
+    </script>
+</body>
+</html>

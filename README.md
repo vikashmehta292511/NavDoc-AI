@@ -63,7 +63,7 @@ uvicorn medical_ai_backend:app --reload
 ## System Requirements
 
 - **RAM**: 8GB minimum (16GB recommended for translation features)
-- **Storage**: 5GB free space for AI model downloads
+- **Storage**: 4GB free space for AI model downloads with all required dependencies
 - **Python**: 3.8 or higher
 - **Internet**: Required for initial AI model downloads
 - **OS**: Windows 10+, macOS 10.14+, Ubuntu 18.04+

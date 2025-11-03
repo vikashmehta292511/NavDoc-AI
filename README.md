@@ -157,7 +157,7 @@ python -m uvicorn medical_ai_backend:app --reload --host 0.0.0.0
 - Close other applications to free RAM
 - Process smaller PDF files if memory constraints exist
 
-## Performance Notes
+## Performance Notes - may vary depend on your system
 
 - **First Run**: 5-15 minutes (model downloads + loading)
 - **Subsequent Runs**: 1-2 minutes startup time

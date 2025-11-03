@@ -172,9 +172,6 @@ python -m uvicorn medical_ai_backend:app --reload --host 0.0.0.0
 4. Push to branch: `git push origin feature/new-feature`
 5. Submit Pull Request
 
-## License
-
-MIT License - See LICENSE file for details
 
 ## Acknowledgments
 

@@ -1,6 +1,6 @@
 # NavDoc AI - Medical Document Analyzer
 
-A comprehensive AI-powered medical document analyzer that extracts, summarizes, and translates medical reports into multiple languages with intelligent medical insights.
+A comprehensive AI-powered medical document analyzer that extracts data whole data from report, summarizes it, and translates it into multiple languages.
 
 ## Features
 
@@ -171,15 +171,5 @@ python -m uvicorn medical_ai_backend:app --reload --host 0.0.0.0
 3. Commit changes: `git commit -m 'Add new feature'`
 4. Push to branch: `git push origin feature/new-feature`
 5. Submit Pull Request
-
-
-## Acknowledgments
-
-- Hugging Face Transformers library
-- Google PEGASUS and T5 models  
-- Facebook BART and mBART models
-- Helsinki-NLP Marian translation models
-- Tesseract OCR community
-- FastAPI framework
 
 ---
